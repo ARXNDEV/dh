@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Stitch Data Mapping for Digital Heroes",
+  "description": "Orchestration schema for User Profiles, Golf Scores, and Charity entities.",
+  "definitions": {
+    "user_profile": {
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string", "format": "uuid" },
+        "full_name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["Registered Subscriber", "Administrator"] },
+        "subscription_status": { "type": "string", "enum": ["active", "inactive", "pending"] },
+        "selected_charity_id": { "type": "string", "format": "uuid" }
+      },
+      "required": ["user_id", "email", "role"]
+    },
+    "golf_score": {
+      "type": "object",
+      "properties": {
+        "score_id": { "type": "string", "format": "uuid" },
+        "user_id": { "type": "string", "format": "uuid" },
+        "stableford_points": { "type": "integer", "minimum": 1, "maximum": 45 },
+        "played_at": { "type": "string", "format": "date" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["user_id", "stableford_points", "played_at"]
+    },
+    "charity_entity": {
+      "type": "object",
+      "properties": {
+        "charity_id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" },
+        "registration_number": { "type": "string" },
+        "total_contributions": { "type": "number" }
+      },
+      "required": ["charity_id", "name"]
+    }
+  },
+  "mappings": {
+    "ScoreSubmission": {
+      "source": "golf_score",
+      "trigger": {
+        "type": "before_insert",
+        "description": "Rolling 5 Rule: Checks if user has 5 scores and prunes the oldest before insertion."
+      },
+      "transformations": [
+        { 
+          "action": "validate_rolling_five", 
+          "logic": "IF COUNT(scores WHERE user_id = $user_id) >= 5 THEN DELETE oldest_score END IF",
+          "target": "user_id" 
+        },
+        { "action": "check_date_uniqueness", "target": ["user_id", "played_at"] }
+      ]
+    },
+    "CharityDistribution": {
+      "source": "user_profile",
+      "joins": [
+        { "entity": "charity_entity", "on": "selected_charity_id" }
+      ],
+      "transformations": [
+        { "action": "calculate_10_percent_cut", "source": "subscription_fee" }
+      ]
+    }
+  }
+}

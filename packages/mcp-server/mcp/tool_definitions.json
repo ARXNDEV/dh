@@ -1,0 +1,38 @@
+[
+  {
+    "name": "submit_score",
+    "description": "Submits a new golf score. Implements Rolling 5 Rule: only the 5 most recent scores are kept. Validates Stableford points (1-45) and ensures no duplicate scores for the same date.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "format": "uuid" },
+        "score": { "type": "integer", "minimum": 1, "maximum": 45 },
+        "date": { "type": "string", "format": "date" }
+      },
+      "required": ["userId", "score", "date"]
+    }
+  },
+  {
+    "name": "simulate_draw",
+    "description": "Performs a pre-analysis of the monthly prize pool based on current active subscribers. Calculates splits for 3, 4, and 5-number matches (40/35/25 ratio).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "month": { "type": "string", "description": "YYYY-MM format" }
+      },
+      "required": ["month"]
+    }
+  },
+  {
+    "name": "calculate_charity_cut",
+    "description": "Calculates the minimum 10% contribution from the subscription fee for the user's selected charity.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "format": "uuid" },
+        "subscriptionAmount": { "type": "number" }
+      },
+      "required": ["userId", "subscriptionAmount"]
+    }
+  }
+]
