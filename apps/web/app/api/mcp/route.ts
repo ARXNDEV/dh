@@ -1,14 +1,8 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '../../lib/supabase';
-
-/**
- * Proxy API for Stitch MCP Server
- */
 
 export async function POST(request: Request) {
   try {
     const { tool, arguments: args } = await request.json();
-    const supabase = getSupabaseAdmin();
     
     switch (tool) {
       case "submit_score":
