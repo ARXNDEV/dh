@@ -3,11 +3,12 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const { tool, arguments: args } = await request.json();
+    const domain = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     
     switch (tool) {
       case "submit_score":
         // Orchestrate via Stitch: Validate -> Check Rolling 5 -> Insert
-        const scoreRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/scores`, {
+        const scoreRes = await fetch(`${domain}/api/scores`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(args)
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
 
       case "simulate_draw":
         // Orchestrate via Stitch: Query Subscribers -> Calculate Pool -> Split
-        const drawRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/draws`, {
+        const drawRes = await fetch(`${domain}/api/draws`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(args)
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
         });
 
       case "calculate_charity_cut":
-        const charityRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/charity`, {
+        const charityRes = await fetch(`${domain}/api/charity`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(args)
